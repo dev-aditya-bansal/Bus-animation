@@ -15,6 +15,7 @@
 <body>
     <!-- Hidden checkboxes for CSS control -->
     <input type="checkbox" id="animationToggle" class="d-none">
+    <input type="checkbox" id="pauseToggle" class="d-none">
     <input type="checkbox" id="resetToggle" class="d-none">
     <input type="radio" name="speed" id="speed05" class="d-none" checked>
     <input type="radio" name="speed" id="speed1" class="d-none">
@@ -186,6 +187,11 @@
                 <i class="bi bi-stop-fill stop-icon d-none"></i>
                 Start
             </label>
+            <label for="pauseToggle" class="btn btn-warning btn-sm" id="pauseResumeBtn">
+                <i class="bi bi-pause-fill pause-icon"></i>
+                <i class="bi bi-play-fill resume-icon d-none"></i>
+                <span class="pause-resume-text">Pause</span>
+            </label>
             <button type="button" class="btn btn-danger btn-sm" onclick="stopEverything(); return false;">
                 <i class="bi bi-stop-fill"></i>
                 Stop
@@ -210,6 +216,11 @@
         let currentTime = null; // Current time that updates every second
         let timeUpdateInterval = null; // Interval for updating time
         let startTime = null; // Time when start button is clicked (frozen)
+        let pauseTimeUpdateInterval = null; // Interval for updating time when paused
+        let currentStopIndex = 0; // Index of the stop the bus is currently approaching
+        let reachedStops = []; // Array to track which stops have been reached (their times are frozen)
+        let pausedTimeOffset = 0; // Time offset when paused (seconds)
+        let originalArrivalTimes = []; // Store original arrival times for each stop
         
         // Function to get current time in "HH:MM:SS AM/PM" format (Indonesia Time - WIB, UTC+7)
         function getCurrentTimeString() {
@@ -274,11 +285,51 @@
             currentData.travel.stops.forEach((stop, index) => {
                 if (index === 0) {
                     // First stop uses the base time
-                    stop.arrival_time = baseTime;
+                    if (reachedStops.includes(index)) {
+                        // If reached, use frozen original time
+                        if (originalArrivalTimes[index]) {
+                            stop.arrival_time = originalArrivalTimes[index];
+                        } else {
+                            stop.arrival_time = baseTime;
+                            originalArrivalTimes[index] = baseTime;
+                        }
+                    } else {
+                        // If not reached and it's the current stop, add paused time offset
+                        const originalTime = originalArrivalTimes[index] || baseTime;
+                        if (index === currentStopIndex && pausedTimeOffset > 0) {
+                            stop.arrival_time = addSecondsToTimeString(originalTime, pausedTimeOffset);
+                        } else {
+                            stop.arrival_time = originalTime;
+                            if (!originalArrivalTimes[index]) {
+                                originalArrivalTimes[index] = originalTime;
+                            }
+                        }
+                    }
                 } else {
                     // Subsequent stops: base time + cumulative add_time
                     cumulativeTime += stop.add_time || 0;
-                    stop.arrival_time = addSecondsToTimeString(baseTime, cumulativeTime);
+                    const calculatedTime = addSecondsToTimeString(baseTime, cumulativeTime);
+                    
+                    if (reachedStops.includes(index)) {
+                        // If reached, use frozen original time
+                        if (originalArrivalTimes[index]) {
+                            stop.arrival_time = originalArrivalTimes[index];
+                        } else {
+                            stop.arrival_time = calculatedTime;
+                            originalArrivalTimes[index] = calculatedTime;
+                        }
+                    } else {
+                        // If not reached and it's the current stop, add paused time offset
+                        const originalTime = originalArrivalTimes[index] || calculatedTime;
+                        if (index === currentStopIndex && pausedTimeOffset > 0) {
+                            stop.arrival_time = addSecondsToTimeString(originalTime, pausedTimeOffset);
+                        } else {
+                            stop.arrival_time = originalTime;
+                            if (!originalArrivalTimes[index]) {
+                                originalArrivalTimes[index] = originalTime;
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -317,6 +368,149 @@
             }, 1000);
         }
         
+        // Function to get current bus position and determine which stop is being approached
+        function getCurrentBusStopIndex() {
+            const busIcon = document.querySelector('.bus-icon-mobile');
+            if (!busIcon || !currentData.travel || !currentData.travel.stops) {
+                console.log('getCurrentBusStopIndex: No bus icon or travel data');
+                return 0;
+            }
+            
+            const stops = currentData.travel.stops;
+            const computedStyle = window.getComputedStyle(busIcon);
+            const animName = computedStyle.animationName;
+            const animPlayState = computedStyle.animationPlayState;
+            const busTop = parseFloat(computedStyle.top) || 62;
+            
+            // Only log when animation state changes or when stop is reached
+            // console.log('getCurrentBusStopIndex: busTop=', busTop, 'animName=', animName, 'animPlayState=', animPlayState);
+            
+            // If animation is not running or paused, return current stop index
+            if (animPlayState === 'paused' || !animName || animName === 'none') {
+                // Don't log every time when paused - too verbose
+                // console.log('getCurrentBusStopIndex: Animation paused or not running, returning current stop index:', currentStopIndex);
+                return currentStopIndex;
+            }
+            
+            // Get bus position from top value
+            const baseTopPx = 62;
+            const stopSpacingPx = 112;
+            
+            // Calculate which stop based on position
+            for (let i = 0; i < stops.length; i++) {
+                const stopTopPx = baseTopPx + (i * stopSpacingPx);
+                const nextStopTopPx = i < stops.length - 1 ? baseTopPx + ((i + 1) * stopSpacingPx) : stopTopPx;
+                
+                // Check if bus has reached this stop (within 5px tolerance)
+                if (busTop >= stopTopPx - 5 && busTop < nextStopTopPx + 5) {
+                    // Bus is at or past this stop
+                    if (!reachedStops.includes(i) && busTop >= stopTopPx - 2) {
+                        // Mark stop as reached and store its original time
+                        reachedStops.push(i);
+                        reachedStops.sort((a, b) => a - b);
+                        console.log('Stop', i, 'reached! Reached stops:', reachedStops);
+                        // Store the current arrival time as the original (frozen) time
+                        if (currentData.travel.stops[i]) {
+                            originalArrivalTimes[i] = currentData.travel.stops[i].arrival_time;
+                            console.log('Stored original time for stop', i, ':', originalArrivalTimes[i]);
+                        }
+                    }
+                    // Set current stop to next one if this one is reached
+                    if (reachedStops.includes(i)) {
+                        currentStopIndex = Math.min(i + 1, stops.length - 1);
+                    } else {
+                        currentStopIndex = i;
+                    }
+                    console.log('Current stop index set to:', currentStopIndex);
+                    break;
+                }
+            }
+            
+            return currentStopIndex;
+        }
+        
+        // Function to start tracking bus position
+        let busTrackingInterval = null;
+        function startBusPositionTracking() {
+            if (busTrackingInterval) {
+                clearInterval(busTrackingInterval);
+            }
+            
+            busTrackingInterval = setInterval(() => {
+                const animationToggle = document.getElementById('animationToggle');
+                if (animationToggle && animationToggle.checked) {
+                    getCurrentBusStopIndex();
+                } else {
+                    if (busTrackingInterval) {
+                        clearInterval(busTrackingInterval);
+                        busTrackingInterval = null;
+                    }
+                }
+            }, 100); // Check every 100ms
+        }
+        
+        // Function to update time when paused
+        function startPauseTimeUpdate() {
+            // console.log('startPauseTimeUpdate called');
+            if (pauseTimeUpdateInterval) {
+                clearInterval(pauseTimeUpdateInterval);
+                // console.log('Cleared existing pause time update interval');
+            }
+            
+            // Store original time for current stop when pausing
+            if (!currentData.travel || !currentData.travel.stops) {
+                console.log('No travel data available');
+                return;
+            }
+            const currentStop = currentData.travel.stops[currentStopIndex];
+            if (currentStop && !originalArrivalTimes[currentStopIndex]) {
+                originalArrivalTimes[currentStopIndex] = currentStop.arrival_time;
+                console.log('Stored original time for stop', currentStopIndex, ':', originalArrivalTimes[currentStopIndex]);
+            }
+            
+            // console.log('Starting pause time update interval');
+            pauseTimeUpdateInterval = setInterval(() => {
+                const pauseToggle = document.getElementById('pauseToggle');
+                if (pauseToggle && pauseToggle.checked) {
+                    // Increment paused time offset
+                    pausedTimeOffset++;
+                    // Only log every 5 seconds to reduce console spam
+                    if (pausedTimeOffset % 5 === 0) {
+                        console.log('Paused time offset:', pausedTimeOffset, 'seconds');
+                    }
+                    // Update current stop's time only
+                    calculateArrivalTimes();
+                    updateTimeDisplay();
+                } else {
+                    // console.log('Pause toggle unchecked, stopping interval');
+                    clearInterval(pauseTimeUpdateInterval);
+                    pauseTimeUpdateInterval = null;
+                }
+            }, 1000);
+        }
+        
+        // Function to stop pause time update
+        function stopPauseTimeUpdate() {
+            // console.log('stopPauseTimeUpdate called');
+            if (pauseTimeUpdateInterval) {
+                clearInterval(pauseTimeUpdateInterval);
+                pauseTimeUpdateInterval = null;
+                // console.log('Pause time update interval cleared');
+            }
+            // When resuming, update original time for current stop and reset offset
+            if (!currentData.travel || !currentData.travel.stops) {
+                // console.log('No travel data available');
+                return;
+            }
+            const currentStop = currentData.travel.stops[currentStopIndex];
+            if (currentStop && pausedTimeOffset > 0) {
+                console.log('Resume: Updated stop', currentStopIndex, 'time from', originalArrivalTimes[currentStopIndex], 'to', currentStop.arrival_time, '(paused for', pausedTimeOffset, 'seconds)');
+                originalArrivalTimes[currentStopIndex] = currentStop.arrival_time;
+                pausedTimeOffset = 0;
+                // console.log('Reset paused time offset to 0');
+            }
+        }
+        
         // Stop everything function
         function stopEverything() {
             // Stop the animation
@@ -325,17 +519,36 @@
                 animationToggle.checked = false;
             }
             
-            // Stop time update interval
+            // Uncheck pause toggle
+            const pauseToggle = document.getElementById('pauseToggle');
+            if (pauseToggle) {
+                pauseToggle.checked = false;
+            }
+            
+            // Remove pause style override
+            const pauseStyle = document.getElementById('pause-style-override');
+            if (pauseStyle) {
+                pauseStyle.remove();
+            }
+            
+            // Stop time update intervals
             if (timeUpdateInterval) {
                 clearInterval(timeUpdateInterval);
                 timeUpdateInterval = null;
             }
             
+            stopPauseTimeUpdate();
+            
+            // Reset tracking variables
+            currentStopIndex = 0;
+            reachedStops = [];
+            pausedTimeOffset = 0;
+            originalArrivalTimes = [];
+            
             // Freeze the current time (don't update anymore)
             if (!startTime) {
                 startTime = currentTime || getCurrentTimeString();
             }
-            
         }
         
         // Handle file selection (hidden, can be triggered programmatically if needed)
@@ -526,6 +739,9 @@
                 return time2 - time1;
             }
             
+            // Make getTimeDifference globally accessible
+            window.getTimeDifference = getTimeDifference;
+            
             function calculateAnimationTiming() {
                 // Use currentData which may have updated arrival times
                 const calcData = currentData;
@@ -607,7 +823,7 @@
                     
                     stopAnimations.push(`
                         #animationToggle:checked ~ .app-container .stop-item:nth-child(${i + 1}) .stop-circle {
-                            animation: stopActive 0s ${elapsed}s forwards, stopPassed 0s ${nextElapsed}s forwards !important;
+                            animation: stopPassed 0s ${nextElapsed}s forwards !important;
                         }
                     `);
                 }
@@ -698,6 +914,12 @@
                         transform: translateY(0) !important;
                     }
                     
+                    /* Pause animation when pauseToggle is checked (both toggles are siblings before .app-container) */
+                    html body #animationToggle:checked ~ #pauseToggle:checked ~ .app-container .route-visualization .bus-icon-mobile,
+                    html body #animationToggle:checked ~ #pauseToggle:checked ~ .app-container .bus-icon-mobile {
+                        animation-play-state: paused !important;
+                    }
+                    
                     /* Animate route line red overlay to show covered distance */
                     html body #animationToggle:checked ~ .app-container .route-line::before {
                         animation: routeLineCovered ${totalDuration}s linear 0s 1 forwards running !important;
@@ -705,6 +927,11 @@
                         animation-duration: ${totalDuration}s !important;
                         animation-timing-function: linear !important;
                         animation-fill-mode: forwards !important;
+                    }
+                    
+                    /* Pause route line animation when pauseToggle is checked */
+                    html body #animationToggle:checked ~ #pauseToggle:checked ~ .app-container .route-line::before {
+                        animation-play-state: paused !important;
                     }
                     
                     /* Reset route line when animation is stopped */
@@ -733,6 +960,12 @@
                             const busIcon = document.querySelector('.bus-icon-mobile');
                             if (busIcon) {
                                 if (this.checked) {
+                                    // Reset tracking variables when starting
+                                    currentStopIndex = 0;
+                                    reachedStops = [];
+                                    pausedTimeOffset = 0;
+                                    originalArrivalTimes = [];
+                                    
                                     // Freeze the start time when start button is clicked
                                     if (!startTime) {
                                         startTime = currentTime || getCurrentTimeString();
@@ -741,12 +974,36 @@
                                             clearInterval(timeUpdateInterval);
                                             timeUpdateInterval = null;
                                         }
-                                        // Recalculate arrival times with frozen start time
-                                        calculateArrivalTimes();
-                                        updateTimeDisplay();
-                                        // Recalculate animation timing
-                                        calculateAnimationTiming();
                                     }
+                                    
+                                    // Uncheck pause toggle when starting
+                                    const pauseToggle = document.getElementById('pauseToggle');
+                                    if (pauseToggle) {
+                                        pauseToggle.checked = false;
+                                    }
+                                    stopPauseTimeUpdate();
+                                    // Remove pause style override
+                                    const pauseStyle = document.getElementById('pause-style-override');
+                                    if (pauseStyle) {
+                                        pauseStyle.remove();
+                                    }
+                                    
+                                    // Recalculate arrival times with frozen start time
+                                    calculateArrivalTimes();
+                                    // Initialize original arrival times
+                                    if (currentData.travel && currentData.travel.stops) {
+                                        currentData.travel.stops.forEach((stop, index) => {
+                                            if (!originalArrivalTimes[index]) {
+                                                originalArrivalTimes[index] = stop.arrival_time;
+                                            }
+                                        });
+                                    }
+                                    updateTimeDisplay();
+                                    // Recalculate animation timing
+                                    calculateAnimationTiming();
+                                    
+                                    // Start tracking bus position
+                                    startBusPositionTracking();
                                     
                                     // Reset to beginning when starting
                                     busIcon.style.animation = 'none';
@@ -815,6 +1072,151 @@
             calculateAnimationTiming();
         }
         
+        // Add pause toggle event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded: Setting up pause button listener');
+            const pauseToggle = document.getElementById('pauseToggle');
+            const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+            const animationToggle = document.getElementById('animationToggle');
+            
+            console.log('Pause toggle element:', pauseToggle);
+            console.log('Pause button element:', pauseResumeBtn);
+            console.log('Animation toggle element:', animationToggle);
+            
+            if (pauseToggle && pauseResumeBtn) {
+                console.log('Adding change event listener to pauseToggle');
+                pauseToggle.addEventListener('change', function() {
+                    console.log('Pause toggle changed! Checked:', this.checked);
+                    console.log('Animation toggle checked:', animationToggle ? animationToggle.checked : 'null');
+                    
+                    // Check if animation exists by checking the bus icon
+                    const busIcon = document.querySelector('.bus-icon-mobile');
+                    let animationExists = false;
+                    if (busIcon) {
+                        const computedStyle = window.getComputedStyle(busIcon);
+                        const animName = computedStyle.animationName;
+                        const animPlayState = computedStyle.animationPlayState;
+                        // Animation exists if it has a name (even if paused)
+                        animationExists = (animName && animName !== 'none');
+                        // console.log('Animation state check - animName:', animName, 'animPlayState:', animPlayState, 'animationExists:', animationExists);
+                    }
+                    
+                    // Allow pause/resume if animation exists (regardless of current play state)
+                    // Also check if animation toggle is checked OR if animation actually exists
+                    const canPause = animationExists || (animationToggle && animationToggle.checked);
+                    if (!canPause) {
+                        console.log('Animation does not exist, preventing pause');
+                        this.checked = false;
+                        return;
+                    }
+                    
+                    // console.log('Can pause/resume:', canPause);
+                    
+                    if (this.checked) {
+                        console.log('PAUSING animation');
+                        // Pause: start updating current stop time
+                        getCurrentBusStopIndex(); // Update current stop index
+                        console.log('Current stop index:', currentStopIndex);
+                        startPauseTimeUpdate();
+                        console.log('Started pause time update interval');
+                        
+                        // Directly pause the animation via JavaScript
+                        // We'll add a style element with higher specificity
+                        let pauseStyle = document.getElementById('pause-style-override');
+                        if (!pauseStyle) {
+                            console.log('Creating pause style override element');
+                            pauseStyle = document.createElement('style');
+                            pauseStyle.id = 'pause-style-override';
+                            document.head.appendChild(pauseStyle);
+                        }
+                        pauseStyle.textContent = `
+                            html body .app-container .bus-icon-mobile {
+                                animation-play-state: paused !important;
+                            }
+                            html body .app-container .route-line::before {
+                                animation-play-state: paused !important;
+                            }
+                        `;
+                        console.log('Pause style override applied');
+                        
+                        // Check animation state
+                        const busIcon = document.querySelector('.bus-icon-mobile');
+                        if (busIcon) {
+                            const computedStyle = window.getComputedStyle(busIcon);
+                            console.log('Bus icon animation play state:', computedStyle.animationPlayState);
+                            console.log('Bus icon animation name:', computedStyle.animationName);
+                        }
+                        
+                        // Update button text
+                        const textSpan = pauseResumeBtn.querySelector('.pause-resume-text');
+                        if (textSpan) {
+                            textSpan.textContent = 'Resume';
+                            console.log('Button text changed to: Resume');
+                        }
+                    } else {
+                        console.log('RESUMING animation');
+                        // Resume: stop updating time
+                        stopPauseTimeUpdate();
+                        console.log('Stopped pause time update interval');
+                        
+                        // Remove the pause style override
+                        const pauseStyle = document.getElementById('pause-style-override');
+                        if (pauseStyle) {
+                            pauseStyle.remove();
+                            console.log('Removed pause style override');
+                        }
+                        
+                        // Check animation state
+                        const busIcon = document.querySelector('.bus-icon-mobile');
+                        if (busIcon) {
+                            const computedStyle = window.getComputedStyle(busIcon);
+                            console.log('Bus icon animation play state:', computedStyle.animationPlayState);
+                        }
+                        
+                        // Update button text
+                        const textSpan = pauseResumeBtn.querySelector('.pause-resume-text');
+                        if (textSpan) {
+                            textSpan.textContent = 'Pause';
+                            console.log('Button text changed to: Pause');
+                        }
+                    }
+                });
+            } else {
+                console.error('Pause toggle or button not found!', { pauseToggle, pauseResumeBtn });
+            }
+            
+            // Disable pause button when animation stops
+            if (animationToggle) {
+                animationToggle.addEventListener('change', function() {
+                    console.log('Animation toggle changed! Checked:', this.checked);
+                    if (!this.checked) {
+                        console.log('Animation stopped, resetting pause');
+                        // Uncheck pause when animation stops
+                        if (pauseToggle) {
+                            pauseToggle.checked = false;
+                            console.log('Pause toggle unchecked');
+                        }
+                        stopPauseTimeUpdate();
+                        // Remove pause style override
+                        const pauseStyle = document.getElementById('pause-style-override');
+                        if (pauseStyle) {
+                            pauseStyle.remove();
+                            console.log('Removed pause style override');
+                        }
+                        if (pauseResumeBtn) {
+                            const textSpan = pauseResumeBtn.querySelector('.pause-resume-text');
+                            if (textSpan) {
+                                textSpan.textContent = 'Pause';
+                                console.log('Button text reset to: Pause');
+                            }
+                        }
+                    } else {
+                        console.log('Animation started');
+                    }
+                });
+            }
+        });
+        
         // Load values when page loads
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', loadValues);
@@ -824,3 +1226,4 @@
     </script>
 </body>
 </html>
+
