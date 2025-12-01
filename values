@@ -1,0 +1,35 @@
+{
+  "travel": {
+    "name": "Kembangan - Masjid Al Asri Cilegon",
+    "stops":[
+              {
+                "stop": "Kembangan, West Jakarta City, Jakarta, Indonesia",
+                "add_time": 0
+              },
+              {
+                "stop": "Bitung Bitung Jaya Tangerang Regency Banten Indonesia",
+                "add_time": 15
+              },
+              {
+                "stop": "Balaraja Tangerang Regency Banten Indonesia",
+                "add_time": 15
+              },
+              {
+                "stop": "Kragilan Serang Regency Banten Indonesia",
+                "add_time": 15
+              },
+              {
+                "stop": "Serang Serang City Banten Indonesia",
+                "add_time": 5
+              },
+              {
+                "stop": "Cilegon Banten Indonesia",
+                "add_time": 10
+              },
+              {
+                "stop": "Masjid Al Asri PT. Chandra Asri Petrochemical Tbk Jalan Brigadir Jenderal Katamso Gunungsugih Cilegon Banten Indonesia",
+                "add_time": 10
+              }
+            ]
+          }
+}

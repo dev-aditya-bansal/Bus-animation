@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Route Tracker</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Hidden checkboxes for CSS control -->
+    <input type="checkbox" id="animationToggle" class="d-none">
+    <input type="checkbox" id="resetToggle" class="d-none">
+    <input type="radio" name="speed" id="speed05" class="d-none" checked>
+    <input type="radio" name="speed" id="speed1" class="d-none">
+    <input type="radio" name="speed" id="speed2" class="d-none">
+    <input type="radio" name="speed" id="speed5" class="d-none">
+    <input type="radio" name="direction" id="dir1" class="d-none" checked>
+    <input type="radio" name="direction" id="dir2" class="d-none">
+    
+    <div class="app-container">
+        <!-- Route Header -->
+        <div class="route-header">
+            <h2 class="route-title mb-0">{{ values.travel.name }}</h2>
+            
+            <!-- Direction Tabs -->
+            <div class="direction-tabs mt-3">
+                <div class="tabs-wrapper">
+                    <label for="dir1" class="direction-tab">{{ values.travel.name }}</label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Route Content -->
+        <div class="route-content">
+            <!-- Route Line and Stops -->
+            <div class="route-visualization">
+                <div class="route-line"></div>
+                
+                <!-- Bus Icon (animated) -->
+                <div class="bus-icon-mobile">
+                    <i class="bi bi-bus-front-fill"></i>
+                </div>
+                
+                <!-- Stops List -->
+                <div class="stops-list">
+                    <div class="stop-item">
+                        <div class="stop-circle"></div>
+                        <div class="bus-card">
+                            <div class="d-flex align-items-start">
+                                <div class="bus-icon-small">
+                                    <i class="bi bi-bus-front"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="align-items-center mb-2">
+                                            <div class="bus-location">{{values.travel.stops.0.stop}}</div>
+                                            <div class="arrival-clock">{{values.travel.stops.0.arrival_time}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stop-item">
+                        <div class="stop-circle"></div>
+                        <div class="bus-card">
+                            <div class="d-flex align-items-start">
+                                <div class="bus-icon-small">
+                                    <i class="bi bi-bus-front"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="align-items-center mb-2">
+                                            <div class="bus-location">{{values.travel.stops.1.stop}}</div>
+                                            <div class="arrival-clock">{{values.travel.stops.1.arrival_time}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stop-item">
+                        <div class="stop-circle"></div>
+                        <div class="bus-card">
+                            <div class="d-flex align-items-start">
+                                <div class="bus-icon-small">
+                                    <i class="bi bi-bus-front"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="align-items-center mb-2">
+                                            <div class="bus-location">{{values.travel.stops.2.stop}}</div>
+                                            <div class="arrival-clock">{{values.travel.stops.2.arrival_time}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stop-item">
+                        <div class="stop-circle"></div>
+                        <div class="bus-card">
+                            <div class="d-flex align-items-start">
+                                <div class="bus-icon-small">
+                                    <i class="bi bi-bus-front"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="align-items-center mb-2">
+                                            <div class="bus-location">{{values.travel.stops.3.stop}}</div>
+                                            <div class="arrival-clock">{{values.travel.stops.3.arrival_time}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stop-item">
+                        <div class="stop-circle"></div>
+                        <div class="bus-card">
+                            <div class="d-flex align-items-start">
+                                <div class="bus-icon-small">
+                                    <i class="bi bi-bus-front"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="align-items-center mb-2">
+                                            <div class="bus-location">{{values.travel.stops.4.stop}}</div>
+                                            <div class="arrival-clock">{{values.travel.stops.4.arrival_time}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stop-item">
+                        <div class="stop-circle"></div>
+                        <div class="bus-card">
+                            <div class="d-flex align-items-start">
+                                <div class="bus-icon-small">
+                                    <i class="bi bi-bus-front"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="align-items-center mb-2">
+                                            <div class="bus-location">{{values.travel.stops.5.stop}}</div>
+                                            <div class="arrival-clock">{{values.travel.stops.5.arrival_time}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stop-item">
+                        <div class="stop-circle"></div>
+                        <div class="bus-card">
+                            <div class="d-flex align-items-start">
+                                <div class="bus-icon-small">
+                                    <i class="bi bi-bus-front"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="align-items-center mb-2">
+                                            <div class="bus-location">{{values.travel.stops.6.stop}}</div>
+                                            <div class="arrival-clock">{{values.travel.stops.6.arrival_time}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controls (for animation) -->
+        <div class="controls-panel">
+            <label for="animationToggle" class="btn btn-success btn-sm">
+                <i class="bi bi-play-fill play-icon"></i>
+                <i class="bi bi-stop-fill stop-icon d-none"></i>
+                Start
+            </label>
+            <button type="button" class="btn btn-danger btn-sm" onclick="stopEverything(); return false;">
+                <i class="bi bi-stop-fill"></i>
+                Stop
+            </button>
+            <input type="file" id="valuesFile" accept=".json,application/json" style="display: none;" onchange="handleFileSelect(event)">
+        </div>
+    </div>
+    
+    <!-- Script to load and populate values -->
+    <script>
+        // Fallback data (will be used if file can't be loaded)
+        const fallbackData = {
+            "travel": {
+                "name": "",
+                "stops": [
+                    
+                ]
+            }
+        };
+        
+        let currentData = fallbackData;
+        let currentTime = null; // Current time that updates every second
+        let timeUpdateInterval = null; // Interval for updating time
+        let startTime = null; // Time when start button is clicked (frozen)
+        
+        // Function to get current time in "HH:MM:SS AM/PM" format (Indonesia Time - WIB, UTC+7)
+        function getCurrentTimeString() {
+            const now = new Date();
+            // Convert to Indonesia time (WIB - UTC+7)
+            const indonesiaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
+            
+            let hours = indonesiaTime.getHours();
+            const minutes = indonesiaTime.getMinutes();
+            const seconds = indonesiaTime.getSeconds();
+            const period = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            if (hours === 0) hours = 12;
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
+        }
+        
+        // Function to add seconds to a time string
+        function addSecondsToTimeString(timeStr, secondsToAdd) {
+            function parseTime(timeStr) {
+                const [timePart, period] = timeStr.trim().split(/\s+/);
+                const parts = timePart.split(':');
+                const hours = parseInt(parts[0]) || 0;
+                const minutes = parseInt(parts[1]) || 0;
+                const seconds = parseInt(parts[2]) || 0;
+                let totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                if (period) {
+                    const periodUpper = period.toUpperCase();
+                    if (periodUpper === 'PM' && hours !== 12) {
+                        totalSeconds += 12 * 3600;
+                    } else if (periodUpper === 'AM' && hours === 12) {
+                        totalSeconds -= 12 * 3600;
+                    }
+                }
+                return totalSeconds;
+            }
+            
+            function formatTime(totalSeconds) {
+                const hours24 = Math.floor(totalSeconds / 3600) % 24;
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                
+                let hours12 = hours24 % 12;
+                if (hours12 === 0) hours12 = 12;
+                const period = hours24 >= 12 ? 'PM' : 'AM';
+                
+                return `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
+            }
+            
+            const totalSeconds = parseTime(timeStr) + secondsToAdd;
+            return formatTime(totalSeconds);
+        }
+        
+        // Function to calculate arrival times based on current time and add_time
+        function calculateArrivalTimes() {
+            if (!currentData.travel || !currentData.travel.stops) return;
+            
+            const baseTime = startTime || currentTime || getCurrentTimeString();
+            let cumulativeTime = 0;
+            
+            currentData.travel.stops.forEach((stop, index) => {
+                if (index === 0) {
+                    // First stop uses the base time
+                    stop.arrival_time = baseTime;
+                } else {
+                    // Subsequent stops: base time + cumulative add_time
+                    cumulativeTime += stop.add_time || 0;
+                    stop.arrival_time = addSecondsToTimeString(baseTime, cumulativeTime);
+                }
+            });
+        }
+        
+        // Function to update time display
+        function updateTimeDisplay() {
+            if (!currentData.travel || !currentData.travel.stops) return;
+            
+            calculateArrivalTimes();
+            
+            // Update all arrival-clock elements
+            const arrivalClocks = document.querySelectorAll('.arrival-clock');
+            arrivalClocks.forEach((clock, index) => {
+                if (currentData.travel.stops[index]) {
+                    clock.textContent = currentData.travel.stops[index].arrival_time;
+                }
+            });
+        }
+        
+        // Start time update interval when page loads
+        function startTimeUpdate() {
+            // Get current time
+            currentTime = getCurrentTimeString();
+            
+            // Calculate initial arrival times
+            calculateArrivalTimes();
+            updateTimeDisplay();
+            
+            // Update time every second
+            timeUpdateInterval = setInterval(() => {
+                if (!startTime) { // Only update if start button hasn't been clicked
+                    currentTime = getCurrentTimeString();
+                    calculateArrivalTimes();
+                    updateTimeDisplay();
+                }
+            }, 1000);
+        }
+        
+        // Stop everything function
+        function stopEverything() {
+            // Stop the animation
+            const animationToggle = document.getElementById('animationToggle');
+            if (animationToggle) {
+                animationToggle.checked = false;
+            }
+            
+            // Stop time update interval
+            if (timeUpdateInterval) {
+                clearInterval(timeUpdateInterval);
+                timeUpdateInterval = null;
+            }
+            
+            // Freeze the current time (don't update anymore)
+            if (!startTime) {
+                startTime = currentTime || getCurrentTimeString();
+            }
+            
+        }
+        
+        // Handle file selection (hidden, can be triggered programmatically if needed)
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    currentData = data;
+                    processData(data);
+                    // Restart time update if not already started
+                    if (timeUpdateInterval) {
+                        clearInterval(timeUpdateInterval);
+                    }
+                    startTime = null; // Reset start time when new file is loaded
+                    startTimeUpdate();
+                } catch (error) {
+                    alert('Error parsing JSON file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        
+        async function loadValues() {
+            let data = fallbackData;
+            let loadedFromFile = false;
+            
+            try {
+                // Try both 'values' and 'values.json'
+                let response;
+                try {
+                    response = await fetch('values.json');
+                    if (!response.ok) {
+                        throw new Error('values.json not found');
+                    }
+                } catch (e) {
+                    response = await fetch('values');
+                }
+                
+                if (response && response.ok) {
+                    data = await response.json();
+                    currentData = data;
+                    loadedFromFile = true;
+                } else {
+                }
+            } catch (error) {
+            }
+            
+            processData(data);
+            
+            // Start time update after data is loaded
+            startTimeUpdate();
+        }
+        
+        function processData(data) {
+            currentData = data;
+            
+            // Calculate arrival times BEFORE processing placeholders
+            // Get current time first (Indonesia time)
+            if (!currentTime) {
+                currentTime = getCurrentTimeString();
+            }
+            // Make sure arrival times are calculated before replacing placeholders
+            calculateArrivalTimes();
+            
+                
+                // Helper function to extract first part of stop name
+                function getStopName(fullStop) {
+                    return fullStop.split(',')[0].trim();
+                }
+                
+                // Helper function to format time (keep seconds)
+                function formatTime(timeStr) {
+                    // Keep the time as is, just ensure proper formatting
+                    if (!timeStr) return '00:00:00 AM';
+                    return timeStr.trim();
+                }
+                
+                // Walk through all text nodes and replace placeholders
+                function walkNode(node) {
+                    if (node.nodeType === 3) { // Text node
+                        let text = node.textContent;
+                        const parent = node.parentElement;
+                        let changed = false;
+                        
+                        // Replace route name (with or without spaces)
+                        const namePattern = /\{\{\s*values\.travel\.name\s*\}\}/g;
+                        if (namePattern.test(text)) {
+                            text = text.replace(namePattern, (match) => {
+                                changed = true;
+                                // Check if this is in a reverse direction tab
+                                if (parent) {
+                                    const tabText = parent.textContent || '';
+                                    if (tabText.includes('(Reverse)')) {
+                                        const routeParts = data.travel.name.split(' - ');
+                                        if (routeParts.length === 2) {
+                                            return `${routeParts[1]} - ${routeParts[0]}`;
+                                        }
+                                    }
+                                }
+                                return data.travel.name;
+                            });
+                        }
+                        
+                        // Replace stop names (handle both with and without spaces in template)
+                        const stopPattern = /\{\{\s*values\.travel\.stops\.(\d+)\.stop\s*\}\}/g;
+                        if (stopPattern.test(text)) {
+                            text = text.replace(stopPattern, (match, index) => {
+                                changed = true;
+                                const stop = data.travel.stops[parseInt(index)];
+                                if (!stop) return match;
+                                // Check if parent has stop-name class
+                                if (parent && parent.classList.contains('stop-name')) {
+                                    return getStopName(stop.stop);
+                                }
+                                return stop.stop;
+                            });
+                        }
+                        
+                        // Replace arrival times
+                        const timePattern = /\{\{\s*values\.travel\.stops\.(\d+)\.arrival_time\s*\}\}/g;
+                        if (timePattern.test(text)) {
+                            text = text.replace(timePattern, (match, index) => {
+                                changed = true;
+                                const stop = data.travel.stops[parseInt(index)];
+                                if (!stop) return match;
+                                // Check if parent has arrival-clock class
+                                if (parent && parent.classList.contains('arrival-clock')) {
+                                    // Use arrival_time from currentData (which has been calculated)
+                                    const calculatedStop = currentData.travel.stops[parseInt(index)];
+                                    return formatTime(calculatedStop ? calculatedStop.arrival_time : '00:00:00 AM');
+                                }
+                                const calculatedStop = currentData.travel.stops[parseInt(index)];
+                                return calculatedStop ? calculatedStop.arrival_time : '00:00:00 AM';
+                            });
+                        }
+                        
+                        if (changed) {
+                            node.textContent = text;
+                        }
+                    } else {
+                        // Recursively process child nodes
+                        for (let i = 0; i < node.childNodes.length; i++) {
+                            walkNode(node.childNodes[i]);
+                        }
+                    }
+                }
+                
+            // Start walking from body
+            const beforeCount = (document.body.textContent.match(/\{\{/g) || []).length;
+            walkNode(document.body);
+            const afterCount = (document.body.textContent.match(/\{\{/g) || []).length;
+            
+            
+            // Calculate animation timing based on arrival times
+            function parseTime(timeStr) {
+                // Parse "10:00:00 PM" or "10:00:15 PM" format
+                const [timePart, period] = timeStr.trim().split(/\s+/);
+                const parts = timePart.split(':');
+                const hours = parseInt(parts[0]) || 0;
+                const minutes = parseInt(parts[1]) || 0;
+                const seconds = parseInt(parts[2]) || 0;
+                
+                // Convert to seconds since midnight
+                let totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                
+                // Handle AM/PM
+                if (period) {
+                    const periodUpper = period.toUpperCase();
+                    if (periodUpper === 'PM' && hours !== 12) {
+                        totalSeconds += 12 * 3600;
+                    } else if (periodUpper === 'AM' && hours === 12) {
+                        totalSeconds -= 12 * 3600;
+                    }
+                }
+                
+                return totalSeconds;
+            }
+            
+            // Calculate time difference in seconds between two time strings
+            function getTimeDifference(timeStr1, timeStr2) {
+                const time1 = parseTime(timeStr1);
+                const time2 = parseTime(timeStr2);
+                return time2 - time1;
+            }
+            
+            function calculateAnimationTiming() {
+                // Use currentData which may have updated arrival times
+                const calcData = currentData;
+                if (!calcData.travel.stops || calcData.travel.stops.length < 2) return;
+                
+                const stops = calcData.travel.stops;
+                const startTimeStr = stops[0].arrival_time;
+                const endTimeStr = stops[stops.length - 1].arrival_time;
+                const totalDuration = getTimeDifference(startTimeStr, endTimeStr); // in seconds
+                
+                
+                // Verify first interval
+                if (stops.length > 1) {
+                    const firstInterval = getTimeDifference(stops[0].arrival_time, stops[1].arrival_time);
+                }
+                
+                // Update CSS variable for animation duration
+                document.documentElement.style.setProperty('--animation-duration', `${totalDuration}s`);
+                // Verify the value was set
+                const computedDuration = getComputedStyle(document.documentElement).getPropertyValue('--animation-duration');
+                
+                // Calculate keyframe percentages for each stop
+                // Ensure bus reaches each stop at the exact time the marker activates
+                // Use fixed pixel values instead of calc() for better animation interpolation
+                const keyframes = [];
+                const baseTopPx = 16 + 16 + 30; // 62px - first stop position
+                const stopSpacingPx = 112; // spacing between stops
+                
+                // Start at first stop (0%)
+                keyframes.push(`0% { top: ${baseTopPx}px; }`);
+                
+                // Add keyframe for each stop at the exact time it should arrive
+                for (let i = 1; i < stops.length; i++) {
+                    const elapsed = getTimeDifference(stops[0].arrival_time, stops[i].arrival_time);
+                    const percentage = totalDuration > 0 ? (elapsed / totalDuration) * 100 : 0;
+                    const stopIndex = i;
+                    // Calculate exact pixel position: base + (stop index * spacing)
+                    const stopTopPx = baseTopPx + (stopIndex * stopSpacingPx);
+                    
+                    // Add keyframe at exact percentage - bus should be at this position at this time
+                    keyframes.push(`${percentage.toFixed(6)}% { top: ${stopTopPx}px; }`);
+                    
+                    // Verify: at this percentage, the bus should reach this stop
+                    const expectedTimeAtPercentage = (percentage / 100) * totalDuration;
+                }
+                
+                // Ensure last stop is at 100% (might already be there, but ensure it)
+                const lastStopIndex = stops.length - 1;
+                const lastStopTopPx = baseTopPx + (lastStopIndex * stopSpacingPx);
+                const lastPercentage = keyframes[keyframes.length - 1].match(/^([\d.]+)%/)?.[1];
+                if (!lastPercentage || parseFloat(lastPercentage) < 100) {
+                    keyframes.push(`100% { top: ${lastStopTopPx}px; }`);
+                }
+                
+                // Use keyframes as-is - linear timing will handle smooth interpolation
+                const finalKeyframes = keyframes;
+                
+                // Create or update the keyframe animation
+                const styleId = 'dynamic-bus-animation';
+                let styleElement = document.getElementById(styleId);
+                if (!styleElement) {
+                    styleElement = document.createElement('style');
+                    styleElement.id = styleId;
+                    // Append at the end of head to ensure it overrides any existing styles
+                    document.head.appendChild(styleElement);
+                } else {
+                    // If it exists, remove and recreate to ensure fresh injection
+                    styleElement.remove();
+                    styleElement = document.createElement('style');
+                    styleElement.id = styleId;
+                    document.head.appendChild(styleElement);
+                }
+                
+                // Generate stop marker animations using actual time delays
+                const stopAnimations = [];
+                for (let i = 0; i < stops.length; i++) {
+                    const elapsed = getTimeDifference(stops[0].arrival_time, stops[i].arrival_time); // in seconds
+                    const nextElapsed = i < stops.length - 1 ? getTimeDifference(stops[0].arrival_time, stops[i + 1].arrival_time) : totalDuration;
+                    
+                    stopAnimations.push(`
+                        #animationToggle:checked ~ .app-container .stop-item:nth-child(${i + 1}) .stop-circle {
+                            animation: stopActive 0s ${elapsed}s forwards, stopPassed 0s ${nextElapsed}s forwards !important;
+                        }
+                    `);
+                }
+                
+                // Sort keyframes by percentage to ensure proper order
+                const sortedKeyframes = finalKeyframes.sort((a, b) => {
+                    const percentA = parseFloat(a.match(/^([\d.]+)%/)?.[1] || '0');
+                    const percentB = parseFloat(b.match(/^([\d.]+)%/)?.[1] || '0');
+                    return percentA - percentB;
+                });
+                
+                // Remove duplicates - keep only the last keyframe for each unique percentage
+                const uniqueKeyframes = [];
+                const keyframeMap = new Map();
+                
+                // First pass: collect all keyframes, keeping the last one for each percentage
+                for (const keyframe of sortedKeyframes) {
+                    const match = keyframe.match(/^([\d.]+)%/);
+                    if (match) {
+                        const percent = parseFloat(match[1]);
+                        keyframeMap.set(percent, keyframe);
+                    }
+                }
+                
+                // Second pass: create sorted array from map
+                const sortedPercents = Array.from(keyframeMap.keys()).sort((a, b) => a - b);
+                for (const percent of sortedPercents) {
+                    uniqueKeyframes.push(keyframeMap.get(percent));
+                }
+                
+                // Create keyframes for route line red overlay (height animation)
+                // The red overlay should match the bus position exactly
+                // Route line starts at: calc(16px + 16px + 40px) = 72px
+                // Bus starts at: 62px (10px above route line start)
+                // Bus travels from 62px to last stop position
+                const routeLineKeyframes = [];
+                const routeLineStartPx = 16 + 16 + 40; // 72px - route line top
+                const busStartPx = baseTopPx; // 62px - bus start position
+                const busEndPx = baseTopPx + ((stops.length - 1) * stopSpacingPx); // Last stop position
+                const routeLineTotalHeight = busEndPx - routeLineStartPx; // Total distance the red should cover
+                
+                // At 0%, bus is at 62px, which is 10px above route line (72px), so red height = 0
+                routeLineKeyframes.push(`0% { height: 0px; }`);
+                
+                // Add keyframes at the same percentages as bus movement
+                for (let i = 1; i < stops.length; i++) {
+                    const elapsed = getTimeDifference(stops[0].arrival_time, stops[i].arrival_time);
+                    const percentage = totalDuration > 0 ? (elapsed / totalDuration) * 100 : 0;
+                    // Calculate bus position at this percentage
+                    const busPositionPx = baseTopPx + (i * stopSpacingPx);
+                    // Calculate red overlay height: bus position minus route line start
+                    // But only if bus is below route line start
+                    const redHeightPx = Math.max(0, busPositionPx - routeLineStartPx);
+                    routeLineKeyframes.push(`${percentage.toFixed(6)}% { height: ${redHeightPx}px; }`);
+                }
+                // At 100%, bus is at last stop, red should cover to bus position
+                const finalRedHeightPx = Math.max(0, busEndPx - routeLineStartPx);
+                routeLineKeyframes.push(`100% { height: ${finalRedHeightPx}px; }`);
+                
+                // Create the animation CSS with explicit duration
+                const animationCSS = `
+                    @keyframes busMoveMobile {
+                        ${uniqueKeyframes.join('\n                        ')}
+                    }
+                    @keyframes routeLineCovered {
+                        ${routeLineKeyframes.join('\n                        ')}
+                    }
+                    ${stopAnimations.join('\n                    ')}
+                    
+                    /* Force animation duration - must match stop marker timing - maximum specificity */
+                    html body #animationToggle:checked ~ .app-container .route-visualization .bus-icon-mobile,
+                    html body #animationToggle:checked ~ .app-container .bus-icon-mobile {
+                        /* Remove any transitions that might interfere */
+                        transition: none !important;
+                        /* Set animation properties explicitly */
+                        animation: busMoveMobile ${totalDuration}s linear 0s 1 forwards running !important;
+                        /* Individual properties for maximum compatibility */
+                        animation-name: busMoveMobile !important;
+                        animation-duration: ${totalDuration}s !important;
+                        animation-timing-function: linear !important;
+                        animation-fill-mode: forwards !important;
+                        animation-delay: 0s !important;
+                        animation-iteration-count: 1 !important;
+                        animation-play-state: running !important;
+                        /* Performance optimization */
+                        will-change: top !important;
+                        /* Ensure no transform interference */
+                        transform: translateY(0) !important;
+                    }
+                    
+                    /* Animate route line red overlay to show covered distance */
+                    html body #animationToggle:checked ~ .app-container .route-line::before {
+                        animation: routeLineCovered ${totalDuration}s linear 0s 1 forwards running !important;
+                        animation-name: routeLineCovered !important;
+                        animation-duration: ${totalDuration}s !important;
+                        animation-timing-function: linear !important;
+                        animation-fill-mode: forwards !important;
+                    }
+                    
+                    /* Reset route line when animation is stopped */
+                    html body #animationToggle:not(:checked) ~ .app-container .route-line::before {
+                        animation-play-state: paused !important;
+                    }
+                    
+                    /* When unchecked, pause animation but keep position */
+                    html body #animationToggle:not(:checked) ~ .app-container .bus-icon-mobile {
+                        animation-play-state: paused !important;
+                        /* Don't reset position - forwards fill-mode keeps it */
+                    }
+                `;
+                
+                styleElement.textContent = animationCSS;
+                
+                // Listen for animation toggle to verify and debug animation
+                const animationToggle = document.getElementById('animationToggle');
+                if (animationToggle) {
+                    // Remove any existing listeners to avoid duplicates
+                    const newToggle = animationToggle.cloneNode(true);
+                    animationToggle.parentNode.replaceChild(newToggle, animationToggle);
+                    
+                    newToggle.addEventListener('change', function() {
+                        setTimeout(() => {
+                            const busIcon = document.querySelector('.bus-icon-mobile');
+                            if (busIcon) {
+                                if (this.checked) {
+                                    // Freeze the start time when start button is clicked
+                                    if (!startTime) {
+                                        startTime = currentTime || getCurrentTimeString();
+                                        // Stop time update interval
+                                        if (timeUpdateInterval) {
+                                            clearInterval(timeUpdateInterval);
+                                            timeUpdateInterval = null;
+                                        }
+                                        // Recalculate arrival times with frozen start time
+                                        calculateArrivalTimes();
+                                        updateTimeDisplay();
+                                        // Recalculate animation timing
+                                        calculateAnimationTiming();
+                                    }
+                                    
+                                    // Reset to beginning when starting
+                                    busIcon.style.animation = 'none';
+                                    busIcon.style.top = '62px';
+                                    busIcon.offsetHeight; // Force reflow
+                                    busIcon.style.removeProperty('animation');
+                                    busIcon.style.removeProperty('top');
+                                    // Debug animation state
+                                    const computedStyle = window.getComputedStyle(busIcon);
+                                    const animName = computedStyle.animationName;
+                                    const animDuration = computedStyle.animationDuration;
+                                    const animTiming = computedStyle.animationTimingFunction;
+                                    const animState = computedStyle.animationPlayState;
+                                    
+                                    // Check if keyframes exist
+                                    const keyframesRule = Array.from(document.styleSheets)
+                                        .flatMap(sheet => {
+                                            try {
+                                                return Array.from(sheet.cssRules || []);
+                                            } catch (e) {
+                                                return [];
+                                            }
+                                        })
+                                        .find(rule => rule.name === 'busMoveMobile');
+                                    
+                                    // Verify animation is correct
+                                    
+                                    // Monitor bus position at key times
+                                    const expectedPositions = [];
+                                    for (let i = 0; i < stops.length; i++) {
+                                        const elapsed = getTimeDifference(stops[0].arrival_time, stops[i].arrival_time);
+                                        const expectedTop = 62 + (i * 112); // Match stopSpacingPx = 112
+                                        expectedPositions.push({ time: elapsed, top: expectedTop, stop: i + 1 });
+                                    }
+                                    
+                                    // Check position at intervals
+                                    let checkCount = 0;
+                                    const positionChecker = setInterval(() => {
+                                        if (!newToggle.checked) {
+                                            clearInterval(positionChecker);
+                                            return;
+                                        }
+                                        
+                                        checkCount++;
+                                        const currentTop = parseFloat(window.getComputedStyle(busIcon).top);
+                                        const animElapsed = (checkCount * 0.5); // Check every 0.5s
+                                        
+                                        // Find expected position for this time
+                                        const expected = expectedPositions.find(p => Math.abs(p.time - animElapsed) < 1);
+                                        if (expected) {
+                                            const diff = Math.abs(currentTop - expected.top);
+                                        }
+                                        
+                                        if (animElapsed > totalDuration) {
+                                            clearInterval(positionChecker);
+                                        }
+                                    }, 500); // Check every 500ms
+                                }
+                            }
+                        }, 50);
+                    });
+                }
+                
+            }
+            
+            calculateAnimationTiming();
+        }
+        
+        // Load values when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadValues);
+        } else {
+            loadValues();
+        }
+    </script>
+</body>
+</html>
