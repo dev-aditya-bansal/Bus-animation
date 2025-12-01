@@ -154,7 +154,7 @@ body {
 
 .stop-circle {
     position: absolute;
-    left: -49px;
+    left: -49px; /* Align center with route line: route line center at 35px (28px + 7px), stops-list padding 60px, circle width 16px (radius 8px), so: 60 - 35 + 8 = 33px */
     top: 50%;
     transform: translateY(-50%);
     width: 16px;
@@ -299,6 +299,29 @@ html body #animationToggle:checked ~ #pauseToggle:checked ~ .app-container .rout
     }
 }
 
+/* Tablet adjustments */
+@media (min-width: 481px) and (max-width: 768px) {
+    .route-visualization {
+        padding: 14px;
+    }
+    
+    .route-line {
+        left: 24px; /* Slightly adjusted for tablet */
+    }
+    
+    .bus-icon-mobile {
+        left: 17px; /* Center on route line: 24px + 7px - 14px = 17px */
+    }
+    
+    .stops-list {
+        padding-left: 52px; /* Adjusted for tablet */
+    }
+    
+    .stop-circle {
+        left: -42px; /* Align center with route line: route line center at 31px (24px + 7px), stops-list padding 52px, so: 52 - 31 + 8 = 29px */
+    }
+}
+
 @media (max-width: 480px) {
     .app-container {
         max-width: 100%;
@@ -312,9 +335,25 @@ html body #animationToggle:checked ~ #pauseToggle:checked ~ .app-container .rout
         font-size: 20px;
     }
     
-    .stops-list {
-        padding-left: 50px;
+    .route-visualization {
+        padding: 12px;
     }
+    
+    .route-line {
+        left: 20px; /* Adjusted for mobile: center at 20 + 7 = 27px */
+    }
+    
+    .bus-icon-mobile {
+        left: 13px; /* Center on route line: 20px (route-line left) + 7px (half route-line width) - 14px (half bus icon width) */
+    }
+    
+    .stops-list {
+        padding-left: 42px; /* Adjusted to align with route line center at 27px */
+    }
+    
+    /* .stop-circle {
+        left: -23px; /* Align center with route line: route line center at 27px (20px + 7px), stops-list padding 42px, circle width 16px (radius 8px), so: 42 - 27 + 8 = 23px */
+    /* } */ */
     
     .stop-item {
         padding: 12px 0;
