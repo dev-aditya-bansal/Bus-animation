@@ -318,7 +318,7 @@ html body #animationToggle:checked ~ #pauseToggle:checked ~ .app-container .rout
     }
     
     .stop-circle {
-        left: -42px; /* Align center with route line: route line center at 31px (24px + 7px), stops-list padding 52px, so: 52 - 31 + 8 = 29px */
+        left: -43px; /* Align center with route line: route line center at 31px (24px + 7px), stops-list padding 52px, so: 52 - 31 + 8 = 29px */
     }
 }
 
@@ -351,9 +351,9 @@ html body #animationToggle:checked ~ #pauseToggle:checked ~ .app-container .rout
         padding-left: 42px; /* Adjusted to align with route line center at 27px */
     }
     
-    /* .stop-circle {
-        left: -23px; /* Align center with route line: route line center at 27px (20px + 7px), stops-list padding 42px, circle width 16px (radius 8px), so: 42 - 27 + 8 = 23px */
-    /* } */ */
+    .stop-circle {
+        left: -35px; /* Align center with route line: route line center at 27px (20px + 7px), stops-list padding 42px, circle width 16px (radius 8px), so: 42 - 27 + 8 = 23px */
+    }
     
     .stop-item {
         padding: 12px 0;
