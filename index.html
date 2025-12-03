@@ -294,9 +294,9 @@
                             originalArrivalTimes[index] = baseTime;
                         }
                     } else {
-                        // If not reached and it's the current stop, add paused time offset
+                        // If not reached, add paused time offset to all future stops
                         const originalTime = originalArrivalTimes[index] || baseTime;
-                        if (index === currentStopIndex && pausedTimeOffset > 0) {
+                        if (pausedTimeOffset > 0) {
                             stop.arrival_time = addSecondsToTimeString(originalTime, pausedTimeOffset);
                         } else {
                             stop.arrival_time = originalTime;
@@ -319,9 +319,9 @@
                             originalArrivalTimes[index] = calculatedTime;
                         }
                     } else {
-                        // If not reached and it's the current stop, add paused time offset
+                        // If not reached, add paused time offset to all future stops
                         const originalTime = originalArrivalTimes[index] || calculatedTime;
-                        if (index === currentStopIndex && pausedTimeOffset > 0) {
+                        if (pausedTimeOffset > 0) {
                             stop.arrival_time = addSecondsToTimeString(originalTime, pausedTimeOffset);
                         } else {
                             stop.arrival_time = originalTime;
@@ -457,16 +457,18 @@
                 // console.log('Cleared existing pause time update interval');
             }
             
-            // Store original time for current stop when pausing
+            // Store original times for all unreached stops when pausing
             if (!currentData.travel || !currentData.travel.stops) {
                 console.log('No travel data available');
                 return;
             }
-            const currentStop = currentData.travel.stops[currentStopIndex];
-            if (currentStop && !originalArrivalTimes[currentStopIndex]) {
-                originalArrivalTimes[currentStopIndex] = currentStop.arrival_time;
-                console.log('Stored original time for stop', currentStopIndex, ':', originalArrivalTimes[currentStopIndex]);
-            }
+            // Store original times for all stops that haven't been reached yet
+            currentData.travel.stops.forEach((stop, index) => {
+                if (!reachedStops.includes(index) && !originalArrivalTimes[index]) {
+                    originalArrivalTimes[index] = stop.arrival_time;
+                    console.log('Stored original time for stop', index, ':', originalArrivalTimes[index]);
+                }
+            });
             
             // console.log('Starting pause time update interval');
             pauseTimeUpdateInterval = setInterval(() => {
@@ -497,15 +499,19 @@
                 pauseTimeUpdateInterval = null;
                 // console.log('Pause time update interval cleared');
             }
-            // When resuming, update original time for current stop and reset offset
+            // When resuming, update original times for all unreached stops and reset offset
             if (!currentData.travel || !currentData.travel.stops) {
                 // console.log('No travel data available');
                 return;
             }
-            const currentStop = currentData.travel.stops[currentStopIndex];
-            if (currentStop && pausedTimeOffset > 0) {
-                console.log('Resume: Updated stop', currentStopIndex, 'time from', originalArrivalTimes[currentStopIndex], 'to', currentStop.arrival_time, '(paused for', pausedTimeOffset, 'seconds)');
-                originalArrivalTimes[currentStopIndex] = currentStop.arrival_time;
+            if (pausedTimeOffset > 0) {
+                // Update original times for all unreached stops with their new paused times
+                currentData.travel.stops.forEach((stop, index) => {
+                    if (!reachedStops.includes(index)) {
+                        console.log('Resume: Updated stop', index, 'time from', originalArrivalTimes[index], 'to', stop.arrival_time, '(paused for', pausedTimeOffset, 'seconds)');
+                        originalArrivalTimes[index] = stop.arrival_time;
+                    }
+                });
                 pausedTimeOffset = 0;
                 // console.log('Reset paused time offset to 0');
             }
